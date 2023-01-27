@@ -36,6 +36,8 @@ dependencies:
   audio_session: ^0.1.13
   audio_service: ^0.18.9
 
+  get_it: ^7.2.0
+
   flutter_hooks: ^0.18.5+1
   hooks_riverpod: ^2.1.3
 
