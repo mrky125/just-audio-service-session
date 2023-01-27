@@ -1,8 +1,11 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:just_audio/just_audio.dart';
 
-/// [AudioHandler] を初期化し、システムのコントロールセンターと連携する
-Future<AudioHandler> initAudioService() async {
+import 'data/media_library.dart';
+
+/// [AudioPlayerHandler] を初期化し、システムのコントロールセンターと連携する
+Future<AudioPlayerHandler> initAudioService() async {
   return await AudioService.init(
     builder: () => AudioPlayerHandler(),
     config: const AudioServiceConfig(
@@ -25,8 +28,36 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     _init();
   }
 
+  final _player = AudioPlayer();
+  final _playlist = ConcatenatingAudioSource(children: []);
+  final _mediaLibrary = MediaLibrary();
+
   Future<void> _init() async {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
+
+    await updateQueue(_mediaLibrary.items[MediaLibrary.albumsRootId]!);
+    await _player.setAudioSource(_playlist);
   }
+
+  @override
+  Future<void> updateQueue(List<MediaItem> queue) async {
+    await _playlist.clear();
+    await _playlist.addAll(_itemsToSources(queue));
+  }
+
+  @override
+  Future<void> play() => _player.play();
+
+  @override
+  Future<void> pause() => _player.pause();
 }
+
+AudioSource _itemToSource(MediaItem mediaItem) {
+  final audioSource = AudioSource.uri(Uri.parse(mediaItem.id));
+  // _mediaItemExpando[audioSource] = mediaItem;
+  return audioSource;
+}
+
+List<AudioSource> _itemsToSources(List<MediaItem> mediaItems) =>
+    mediaItems.map(_itemToSource).toList();

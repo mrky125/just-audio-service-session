@@ -5,5 +5,5 @@ import 'package:just_audio_service_session/audio/audio_player_handler.dart';
 GetIt getIt = GetIt.instance;
 
 Future<void> initServiceLocator() async {
-  getIt.registerSingleton<AudioHandler>(await initAudioService());
+  getIt.registerSingleton<AudioPlayerHandler>(await initAudioService());
 }
