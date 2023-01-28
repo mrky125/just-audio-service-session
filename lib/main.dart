@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:just_audio_service_session/audio/audio_controller.dart';
 
 import 'audio/audio_listener.dart';
 import 'audio/ui/audio_progress.dart';
@@ -63,8 +64,10 @@ class MyHomePage extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Increment',
+        onPressed: () {
+          ref.read(audioControllerProvider).setInitialItems();
+        },
+        tooltip: 'Set initial items',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );

@@ -48,9 +48,6 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
     // Propagate all events from the audio player to AudioService clients.
     _player.playbackEventStream.listen(_broadcastState);
-
-    await updateQueue(_mediaLibrary.items[MediaLibrary.albumsRootId]!);
-    await _player.setAudioSource(_playlist);
   }
 
   /// Broadcast new item to the service when index or queue changed.
@@ -112,10 +109,16 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     ));
   }
 
+  Future<void> setInitialItems() async {
+    await updateQueue(_mediaLibrary.items[MediaLibrary.albumsRootId]!);
+    _playlist.addAll(queue.value.toAudioSources());
+    await _player.setAudioSource(_playlist);
+  }
+
   @override
   Future<void> updateQueue(List<MediaItem> queue) async {
     await _playlist.clear();
-    final audioSources = queue.toAudioSources((source, index) {
+    final audioSources = queue.toAudioSources(action: (source, index) {
       _mediaItems[source] = queue[index];
     });
     await _playlist.addAll(audioSources);
@@ -123,7 +126,7 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> addQueueItem(MediaItem mediaItem) async {
-    await _playlist.add(mediaItem.toAudioSource((source) {
+    await _playlist.add(mediaItem.toAudioSource(action: (source) {
       _mediaItems[source] = mediaItem;
     }));
   }
@@ -147,22 +150,22 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 }
 
 extension ItemToSource on MediaItem {
-  AudioSource toAudioSource(
-    void Function(AudioSource) action,
-  ) {
+  AudioSource toAudioSource({
+    void Function(AudioSource)? action,
+  }) {
     final source = AudioSource.uri(Uri.parse(id));
-    action(source);
+    if (action != null) action(source);
     return source;
   }
 }
 
 extension ItemsToSources on List<MediaItem> {
-  List<AudioSource> toAudioSources(
-    void Function(AudioSource, int) action,
-  ) {
+  List<AudioSource> toAudioSources({
+    void Function(AudioSource, int)? action,
+  }) {
     return asMap().entries.map((e) {
-      return e.value.toAudioSource((source) {
-        action(source, e.key);
+      return e.value.toAudioSource(action: (source) {
+        if (action != null) action(source, e.key);
       });
     }).toList();
   }

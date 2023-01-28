@@ -44,4 +44,10 @@ class AudioController {
       if (duration != null) seek(duration);
     }
   }
+
+  Future<void> setInitialItems() async {
+    // set initial items
+    _handler.setInitialItems();
+  }
+
 }
