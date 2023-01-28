@@ -45,12 +45,13 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
     _broadcastItemChanges();
     _broadcastQueue();
-
-    // Propagate all events from the audio player to AudioService clients.
-    _player.playbackEventStream.listen(_broadcastState);
+    _player.playbackEventStream.listen((event) {
+      _broadcastItemDuration(event);
+      _broadcastState(event);
+    });
   }
 
-  /// Broadcast new item to the service when index or queue changed.
+  /// Broadcast media item changes.
   void _broadcastItemChanges() {
     Rx.combineLatest2<int?, List<MediaItem>, MediaItem?>(
       _player.currentIndexStream,
@@ -58,10 +59,14 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
       (index, queue) {
         final newItem =
             (index != null && index < queue.length) ? queue[index] : null;
-        Logger().d('newItem: $newItem, index: $index, queue: $queue');
+        Logger().d(
+            'item changed, index: $index, length: ${queue.length}, item: $newItem');
         return newItem;
       },
-    ).whereType<MediaItem>().distinct().listen(mediaItem.add);
+    ).whereType<MediaItem>().distinct().listen((item) {
+      Logger().d('finally broadcast an unique item: $item');
+      mediaItem.add(item);
+    });
   }
 
   /// Broadcast the current queue to the service.
@@ -74,13 +79,17 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
         .pipe(queue); // important!!!
   }
 
+  /// Update current media item duration.
+  void _broadcastItemDuration(PlaybackEvent event) {
+    // ネットワークから取得したアイテムは、プレーヤーにセット前だとDurationがわからないケースがあるので、ここで取得して情報を更新する
+    mediaItem.add(queue.value[event.currentIndex ?? 0].copyWith(
+      duration: event.duration,
+    ));
+  }
+
+  /// Propagate all events from the audio player to AudioService clients. (except duration)
   void _broadcastState(PlaybackEvent event) {
     final playing = _player.playing;
-    // final queueIndex = getQueueIndex(
-    //   event.currentIndex,
-    //   _player.shuffleModeEnabled,
-    //   _player.shuffleIndices,
-    // );
     playbackState.add(playbackState.value.copyWith(
       controls: [
         // 3つ以内なら、引数`androidCompactActionIndices`を未設定でも、
@@ -105,14 +114,15 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
       updatePosition: _player.position,
       bufferedPosition: _player.bufferedPosition,
       speed: _player.speed,
-      // queueIndex: queueIndex,
+      queueIndex: event.currentIndex,
     ));
   }
 
   Future<void> setInitialItems() async {
     await updateQueue(_mediaLibrary.items[MediaLibrary.albumsRootId]!);
-    _playlist.addAll(queue.value.toAudioSources());
-    await _player.setAudioSource(_playlist);
+    // Can get duration of first item in queue.
+    final duration = await _player.setAudioSource(_playlist);
+    Logger().d('duration: $duration, length: ${queue.value.length}');
   }
 
   @override
