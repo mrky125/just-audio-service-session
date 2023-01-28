@@ -1,3 +1,4 @@
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio_service_session/audio/audio_controller.dart';
@@ -63,6 +64,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             const Padding(
               padding: EdgeInsets.all(20),
+              child: AudioProgress(),
+            ),
+            const Padding(
+              padding: EdgeInsets.all(20),
               child: ControlButtons(),
             ),
           ],
@@ -73,6 +78,28 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class AudioProgress extends ConsumerWidget {
+  const AudioProgress({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progressState = ref.watch(progressStateProvider);
+    return ProgressBar(
+      onSeek: (_) {},
+      thumbRadius: 6,
+      barHeight: 4,
+      progress: Duration(seconds: progressState.current.inSeconds),
+      total: Duration(seconds: progressState.total.inSeconds),
+      timeLabelPadding: 4,
+      timeLabelTextStyle: const TextStyle(
+        color: Colors.black45,
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 }
