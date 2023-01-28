@@ -5,7 +5,7 @@ import 'player/audio_player_handler.dart';
 
 final audioControllerProvider = Provider((ref) => AudioController(ref: ref));
 
-/// Wraps [AudioPlayerHandler] and broadcast stream state to UI by provider.
+/// Wraps [AudioPlayerHandler]
 class AudioController {
   AudioController({required this.ref});
 
