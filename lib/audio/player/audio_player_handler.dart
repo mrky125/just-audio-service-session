@@ -1,6 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../data/media_library.dart';
@@ -57,9 +58,10 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     Rx.combineLatest2<int?, List<MediaItem>, MediaItem?>(
       _player.currentIndexStream,
       queue,
-          (index, queue) {
+      (index, queue) {
         final newItem =
-        (index != null && index < queue.length) ? queue[index] : null;
+            (index != null && index < queue.length) ? queue[index] : null;
+        Logger().d('newItem: $newItem, index: $index, queue: $queue');
         return newItem;
       },
     ).whereType<MediaItem>().distinct().listen(mediaItem.add);
