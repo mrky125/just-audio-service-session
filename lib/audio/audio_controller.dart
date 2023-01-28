@@ -23,4 +23,12 @@ class AudioController {
   Future<void> seek(Duration position) async {
     _handler.seek(position);
   }
+
+  Future<void> skipToPrevious() async {
+    _handler.skipToPrevious();
+  }
+
+  Future<void> skipToNext() async {
+    _handler.skipToNext();
+  }
 }

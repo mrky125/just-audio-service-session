@@ -94,6 +94,12 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> seek(Duration position) => _player.seek(position);
+
+  @override
+  Future<void> skipToPrevious() => _player.seekToPrevious();
+
+  @override
+  Future<void> skipToNext() => _player.seekToNext();
 }
 
 AudioSource _itemToSource(MediaItem mediaItem) {

@@ -32,9 +32,9 @@ class ControlButtons extends ConsumerWidget {
           ),
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: controller.skipToPrevious,
           icon: const Icon(
-            (Icons.fast_rewind),
+            (Icons.skip_previous),
             size: 32,
           ),
         ),
@@ -55,9 +55,9 @@ class ControlButtons extends ConsumerWidget {
           ),
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: controller.skipToNext,
           icon: const Icon(
-            (Icons.fast_forward),
+            (Icons.skip_next),
             size: 32,
           ),
         ),
