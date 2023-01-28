@@ -1,6 +1,9 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:logger/logger.dart';
 
 import '../service_locator.dart';
+import '../standard.dart';
+import 'next_song_notifier.dart';
 import 'player/audio_player_handler.dart';
 
 final audioControllerProvider = Provider((ref) => AudioController(ref: ref));
@@ -50,4 +53,16 @@ class AudioController {
     _handler.setInitialItems();
   }
 
+  void getNextSongAndSet() async {
+    final index = _handler.player.currentIndex;
+    final nextItem = await ref
+        .read(nextSongProvider.notifier)
+        .getNextSong(currentIndex: index ?? 0);
+    nextItem?.also((it) async {
+      Logger().d('add next item to queue, $nextItem');
+      await _handler.addQueueItem(it);
+      await _handler.skipToNext();
+      _handler.play();
+    });
+  }
 }
