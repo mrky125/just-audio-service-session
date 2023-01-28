@@ -25,7 +25,7 @@ class AudioListener {
   }
 
   void _listenDuration() {
-    _handler.getPlayer().positionStream.listen((position) {
+    _handler.player.positionStream.listen((position) {
       ref.read(progressStateProvider.notifier).update(
             (state) => ProgressBarState(
               current: position,
@@ -34,7 +34,7 @@ class AudioListener {
             ),
           );
     });
-    _handler.getPlayer().durationStream.listen((position) {
+    _handler.player.durationStream.listen((position) {
       ref.read(progressStateProvider.notifier).update(
             (state) => ProgressBarState(
               current: state.current,

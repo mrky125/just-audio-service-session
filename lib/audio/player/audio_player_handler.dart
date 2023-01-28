@@ -29,6 +29,7 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   final _player = AudioPlayer();
+  AudioPlayer get player => _player;
   final _playlist = ConcatenatingAudioSource(children: []);
   final _mediaLibrary = MediaLibrary();
 
@@ -42,8 +43,6 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     await updateQueue(_mediaLibrary.items[MediaLibrary.albumsRootId]!);
     await _player.setAudioSource(_playlist);
   }
-
-  AudioPlayer getPlayer() => _player;
 
   void _broadcastState(PlaybackEvent event) {
     final playing = _player.playing;
