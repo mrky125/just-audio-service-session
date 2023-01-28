@@ -19,4 +19,8 @@ class AudioController {
   Future<void> pause() async {
     _handler.pause();
   }
+
+  Future<void> seek(Duration position) async {
+    _handler.seek(position);
+  }
 }

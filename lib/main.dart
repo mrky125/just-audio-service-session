@@ -87,9 +87,10 @@ class AudioProgress extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(audioControllerProvider);
     final progressState = ref.watch(progressStateProvider);
     return ProgressBar(
-      onSeek: (_) {},
+      onSeek: controller.seek,
       thumbRadius: 6,
       barHeight: 4,
       progress: Duration(seconds: progressState.current.inSeconds),
