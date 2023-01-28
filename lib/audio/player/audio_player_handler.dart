@@ -33,6 +33,10 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   final _playlist = ConcatenatingAudioSource(children: []);
   final _mediaLibrary = MediaLibrary();
 
+  // This can be replaced with like below.
+  // ```final _mediaItems = Expando<MediaItem>();```
+  final _mediaItems = <AudioSource, MediaItem>{};
+
   Future<void> _init() async {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
@@ -82,7 +86,10 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   @override
   Future<void> updateQueue(List<MediaItem> queue) async {
     await _playlist.clear();
-    await _playlist.addAll(_itemsToSources(queue));
+    final audioSources = queue.toAudioSources((source, index) {
+      _mediaItems[source] = queue[index];
+    });
+    await _playlist.addAll(audioSources);
   }
 
   @override
@@ -101,11 +108,24 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   Future<void> skipToNext() => _player.seekToNext();
 }
 
-AudioSource _itemToSource(MediaItem mediaItem) {
-  final audioSource = AudioSource.uri(Uri.parse(mediaItem.id));
-  // _mediaItemExpando[audioSource] = mediaItem;
-  return audioSource;
+extension ItemToSource on MediaItem {
+  AudioSource toAudioSource(
+    void Function(AudioSource) action,
+  ) {
+    final source = AudioSource.uri(Uri.parse(id));
+    action(source);
+    return source;
+  }
 }
 
-List<AudioSource> _itemsToSources(List<MediaItem> mediaItems) =>
-    mediaItems.map(_itemToSource).toList();
+extension ItemsToSources on List<MediaItem> {
+  List<AudioSource> toAudioSources(
+    void Function(AudioSource, int) action,
+  ) {
+    return asMap().entries.map((e) {
+      return e.value.toAudioSource((source) {
+        action(source, e.key);
+      });
+    }).toList();
+  }
+}
