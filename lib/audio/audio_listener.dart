@@ -1,7 +1,9 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_service_session/audio/state/progress_bar_state.dart';
 
 import '../service_locator.dart';
+import 'next_song_notifier.dart';
 import 'player/audio_player_handler.dart';
 import 'audio_state_notifier.dart';
 
@@ -16,6 +18,7 @@ class AudioListener {
   void startListen() {
     _listenPlaybackState();
     _listenDuration();
+    _listenProcessingState();
   }
 
   void _listenPlaybackState() {
@@ -42,6 +45,19 @@ class AudioListener {
               total: position ?? state.total,
             ),
           );
+    });
+  }
+
+  void _listenProcessingState() {
+    _handler.player.processingStateStream.listen((state) async {
+      if (state == ProcessingState.completed) {
+        final index = _handler.player.currentIndex;
+        final nextItem = await ref
+            .read(nextSongProvider.notifier)
+            .getNextSong(currentIndex: index ?? 0);
+        await _handler.addQueueItem(nextItem);
+        _handler.skipToNext();
+      }
     });
   }
 }

@@ -122,6 +122,13 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
+  Future<void> addQueueItem(MediaItem mediaItem) async {
+    await _playlist.add(mediaItem.toAudioSource((source) {
+      _mediaItems[source] = mediaItem;
+    }));
+  }
+
+  @override
   Future<void> play() => _player.play();
 
   @override
