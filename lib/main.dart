@@ -1,10 +1,9 @@
-import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:just_audio_service_session/audio/audio_controller.dart';
-import 'package:just_audio_service_session/audio/audio_listener.dart';
-import 'package:just_audio_service_session/audio/audio_state_notifier.dart';
 
+import 'audio/audio_listener.dart';
+import 'audio/ui/audio_progress.dart';
+import 'audio/ui/control_buttons.dart';
 import 'service_locator.dart';
 
 void main() async {
@@ -27,39 +26,29 @@ class MyApp extends ConsumerWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends ConsumerWidget {
   const MyHomePage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref
+        .read(audioListenerProvider)
+        .startListen(); // initialize and listen stream
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              'album name here',
             ),
             Text(
-              '$_counter',
+              'song name here',
               style: Theme.of(context).textTheme.headline4,
             ),
             const Padding(
@@ -74,106 +63,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () {},
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-}
-
-class AudioProgress extends ConsumerWidget {
-  const AudioProgress({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(audioControllerProvider);
-    final progressState = ref.watch(progressStateProvider);
-    return ProgressBar(
-      onSeek: controller.seek,
-      thumbRadius: 6,
-      barHeight: 4,
-      progress: Duration(seconds: progressState.current.inSeconds),
-      total: Duration(seconds: progressState.total.inSeconds),
-      timeLabelPadding: 4,
-      timeLabelTextStyle: const TextStyle(
-        color: Colors.black45,
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-}
-
-class ControlButtons extends ConsumerWidget {
-  const ControlButtons({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    const sideButtonWidth = 60.0;
-    ref.read(audioListenerProvider).startListen(); // initialize and listen stream
-    final controller = ref.read(audioControllerProvider);
-    final playbackState = ref.watch(playbackStateProvider);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        SizedBox(
-          width: sideButtonWidth,
-          child: FittedBox(
-            child: TextButton(
-              onPressed: () => {},
-              child: const Text(
-                'TODO',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(
-            (Icons.fast_rewind),
-            size: 32,
-          ),
-        ),
-        IconButton(
-          onPressed: () {
-            if (playbackState.playing) {
-              controller.pause();
-            } else {
-              controller.play();
-            }
-          },
-          iconSize: 64,
-          icon: Icon(
-            playbackState.playing
-                ? Icons.pause_rounded
-                : Icons.play_arrow_rounded,
-            size: 64,
-          ),
-        ),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(
-            (Icons.fast_forward),
-            size: 32,
-          ),
-        ),
-        SizedBox(
-          width: sideButtonWidth,
-          child: IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              (Icons.settings),
-              size: 32,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
