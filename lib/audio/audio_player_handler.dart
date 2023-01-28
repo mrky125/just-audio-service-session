@@ -36,8 +36,48 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
 
+    // Propagate all events from the audio player to AudioService clients.
+    _player.playbackEventStream.listen(_broadcastState);
+
     await updateQueue(_mediaLibrary.items[MediaLibrary.albumsRootId]!);
     await _player.setAudioSource(_playlist);
+  }
+
+  AudioPlayer getPlayer() => _player;
+
+  void _broadcastState(PlaybackEvent event) {
+    final playing = _player.playing;
+    // final queueIndex = getQueueIndex(
+    //   event.currentIndex,
+    //   _player.shuffleModeEnabled,
+    //   _player.shuffleIndices,
+    // );
+    playbackState.add(playbackState.value.copyWith(
+      controls: [
+        // 3つ以内なら、引数`androidCompactActionIndices`を未設定でも、
+        // 通知センターで縮小表示時にボタン3つ全て表示される
+        MediaControl.skipToPrevious,
+        if (playing) MediaControl.pause else MediaControl.play,
+        MediaControl.skipToNext,
+      ],
+      systemActions: const {
+        MediaAction.seek,
+        MediaAction.seekForward,
+        MediaAction.seekBackward,
+      },
+      processingState: const {
+        ProcessingState.idle: AudioProcessingState.idle,
+        ProcessingState.loading: AudioProcessingState.loading,
+        ProcessingState.buffering: AudioProcessingState.buffering,
+        ProcessingState.ready: AudioProcessingState.ready,
+        ProcessingState.completed: AudioProcessingState.completed,
+      }[_player.processingState]!,
+      playing: playing,
+      updatePosition: _player.position,
+      bufferedPosition: _player.bufferedPosition,
+      speed: _player.speed,
+      // queueIndex: queueIndex,
+    ));
   }
 
   @override

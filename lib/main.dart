@@ -1,6 +1,8 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:just_audio_service_session/audio/audio_controller.dart';
+import 'package:just_audio_service_session/audio/audio_listener.dart';
+import 'package:just_audio_service_session/audio/audio_state_notifier.dart';
 
 import 'service_locator.dart';
 
@@ -81,7 +83,9 @@ class ControlButtons extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     const sideButtonWidth = 60.0;
-    final playbackState = PlaybackState();
+    ref.read(audioListenerProvider).startListen(); // initialize and listen stream
+    final controller = ref.read(audioControllerProvider);
+    final playbackState = ref.watch(playbackStateProvider);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -109,7 +113,13 @@ class ControlButtons extends ConsumerWidget {
           ),
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            if (playbackState.playing) {
+              controller.pause();
+            } else {
+              controller.play();
+            }
+          },
           iconSize: 64,
           icon: Icon(
             playbackState.playing
