@@ -1,6 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../data/media_library.dart';
 
@@ -41,11 +42,37 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
 
+    _broadcastItemChanges();
+    _broadcastQueue();
+
     // Propagate all events from the audio player to AudioService clients.
     _player.playbackEventStream.listen(_broadcastState);
 
     await updateQueue(_mediaLibrary.items[MediaLibrary.albumsRootId]!);
     await _player.setAudioSource(_playlist);
+  }
+
+  /// Broadcast new item to the service when index or queue changed.
+  void _broadcastItemChanges() {
+    Rx.combineLatest2<int?, List<MediaItem>, MediaItem?>(
+      _player.currentIndexStream,
+      queue,
+          (index, queue) {
+        final newItem =
+        (index != null && index < queue.length) ? queue[index] : null;
+        return newItem;
+      },
+    ).whereType<MediaItem>().distinct().listen(mediaItem.add);
+  }
+
+  /// Broadcast the current queue to the service.
+  void _broadcastQueue() {
+    _player.sequenceStream
+        .map((sequence) => sequence ?? [])
+        .map((sequence) => sequence
+            .map((source) => _mediaItems[source]!)
+            .toList()) // TODO: null handling?
+        .pipe(queue); // important!!!
   }
 
   void _broadcastState(PlaybackEvent event) {
