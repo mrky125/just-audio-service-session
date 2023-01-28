@@ -12,3 +12,5 @@ final progressStateProvider = StateProvider(
     total: Duration.zero,
   ),
 );
+
+final mediaItemProvider = StateProvider<MediaItem?>((ref) => null);

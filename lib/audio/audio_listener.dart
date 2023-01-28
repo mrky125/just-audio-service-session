@@ -18,6 +18,7 @@ class AudioListener {
   void startListen() {
     _listenPlaybackState();
     _listenDuration();
+    _listenCurrentMediaItem();
     _listenProcessingState();
   }
 
@@ -45,6 +46,12 @@ class AudioListener {
               total: position ?? state.total,
             ),
           );
+    });
+  }
+
+  void _listenCurrentMediaItem() {
+    _handler.mediaItem.listen((mediaItem) {
+      ref.read(mediaItemProvider.notifier).update((state) => mediaItem);
     });
   }
 

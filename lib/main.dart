@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:just_audio_service_session/audio/audio_controller.dart';
 
+import 'audio/audio_controller.dart';
 import 'audio/audio_listener.dart';
+import 'audio/audio_state_notifier.dart';
 import 'audio/ui/audio_progress.dart';
 import 'audio/ui/control_buttons.dart';
 import 'service_locator.dart';
@@ -41,23 +42,41 @@ class MyHomePage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: Center(
+      body: Container(
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'album name here',
+            SizedBox(
+              height: 300,
+              child: Image.network(
+                '${ref.watch(mediaItemProvider)?.artUri}',
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox.shrink(),
+              ),
             ),
-            Text(
-              'song name here',
-              style: Theme.of(context).textTheme.headline4,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                ref.watch(mediaItemProvider)?.album ?? 'no album',
+                style: Theme.of(context).textTheme.titleMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                ref.watch(mediaItemProvider)?.title ?? 'no song',
+                style: Theme.of(context).textTheme.headlineSmall,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const Padding(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.only(top: 20),
               child: AudioProgress(),
             ),
             const Padding(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.symmetric(vertical: 12),
               child: ControlButtons(),
             ),
           ],
