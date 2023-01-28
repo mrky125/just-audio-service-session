@@ -135,7 +135,9 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   Future<void> pause() => _player.pause();
 
   @override
-  Future<void> seek(Duration position) => _player.seek(position);
+  Future<void> seek(final Duration? position, {int? index}) async {
+    _player.seek(position, index: index);
+  }
 
   @override
   Future<void> skipToPrevious() => _player.seekToPrevious();
