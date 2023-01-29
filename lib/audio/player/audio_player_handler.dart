@@ -148,7 +148,10 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
-  Future<void> play() => _player.play();
+  Future<void> play() async {
+    _player.play();
+    await playIfTappedEmptyNotification();
+  }
 
   @override
   Future<void> pause() => _player.pause();
@@ -193,6 +196,20 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     // 現在表示中のアイテムを消すため（iOSはOKだけどAndroidは通知センターに残ってしまい、そこから不正な状態で再生できてしまう）
     mediaItem.add(null);
     // TODO: reset other subjects.
+  }
+
+  // AndroidでstopとremoveAll後も通知センターに残っててコントトールボタンを押された時を想定
+  // TODO: 最後に再生したアイテムとキューを覚えておきたい
+  Future<void> playIfTappedEmptyNotification() async {
+    Logger().d(
+        'item: ${mediaItem.value}, queue length: ${queue.length}, playlist length: ${_playlist.length}, state: ${playbackState.value.processingState}');
+    if (mediaItem.value == null &&
+        queue.value.isEmpty &&
+        _playlist.length == 0 &&
+        playbackState.value.processingState == AudioProcessingState.idle) {
+      await setInitialItems();
+      _player.play();
+    }
   }
 }
 
