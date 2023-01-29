@@ -26,9 +26,11 @@ class NextSongNotifier extends StateNotifier {
       case 3:
         return item13;
       case 4:
+        return item14;
+      case 5:
         return item3;
       default:
-        final songs= [item1, item2, item3, item10, item11, item12, item13];
+        final songs= [item1, item2, item3, item10, item11, item12, item13, item14];
         return (songs..shuffle()).first;
     }
   }
