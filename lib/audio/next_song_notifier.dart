@@ -19,12 +19,17 @@ class NextSongNotifier extends StateNotifier {
     // assumed fetching form network.
     await Future.delayed(const Duration(seconds: 1));
     switch (currentIndex) {
-      case 0:
-        return item10;
       case 1:
-        return item2;
-      default:
         return item11;
+      case 2:
+        return item12;
+      case 3:
+        return item13;
+      case 4:
+        return item3;
+      default:
+        final songs= [item1, item2, item3, item10, item11, item12, item13];
+        return (songs..shuffle()).first;
     }
   }
 }

@@ -51,6 +51,9 @@ class MyHomePage extends ConsumerWidget {
               height: 300,
               child: Image.network(
                 '${ref.watch(mediaItemProvider)?.artUri}',
+                width: 300,
+                height: 300,
+                fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) =>
                     const SizedBox.shrink(),
               ),
