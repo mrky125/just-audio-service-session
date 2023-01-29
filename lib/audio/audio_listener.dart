@@ -1,5 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../service_locator.dart';
 import 'player/audio_player_handler.dart';
@@ -15,9 +16,21 @@ class AudioListener {
   final Ref ref;
   final _handler = getIt<AudioPlayerHandler>();
 
+  // Refer to: https://github.com/ryanheise/audio_service/tree/minor/audio_service/example
+  Stream<ProgressBarState> get _progressStateStream => Rx.combineLatest3(
+        _handler.player.positionStream,
+        _handler.player.bufferedPositionStream,
+        _handler.player.durationStream,
+        (current, buffered, total) => ProgressBarState(
+          current: current,
+          buffered: buffered,
+          total: total ?? Duration.zero,
+        ),
+      );
+
   void startListen() {
     _listenPlaybackState();
-    _listenDuration();
+    _listenProgressState();
     _listenCurrentMediaItem();
     _listenProcessingState();
   }
@@ -28,24 +41,19 @@ class AudioListener {
     });
   }
 
-  void _listenDuration() {
-    _handler.player.positionStream.listen((position) {
-      ref.read(progressStateProvider.notifier).update(
-            (state) => ProgressBarState(
-              current: position,
-              buffered: state.buffered,
-              total: state.total,
-            ),
-          );
-    });
-    _handler.player.durationStream.listen((position) {
-      ref.read(progressStateProvider.notifier).update(
-            (state) => ProgressBarState(
-              current: state.current,
-              buffered: state.buffered,
-              total: position ?? state.total,
-            ),
-          );
+  void _listenProgressState() {
+    _progressStateStream.listen((progressState) {
+      ref.read(progressStateProvider.notifier).update((state) => progressState);
+      // 全体の長さが取得できていて（ゼロでなくて）曲の末尾に到達、かつプレイリストも末尾なら、次のアイテムを取得する
+      // NOTE: 一時停止状態で次へボタンじゃなくてシークバーで末尾に移動すると、ミリ秒の値が差分あって末尾判定してないけど、どうするかはプロダクトの仕様次第
+      //  ex) progress: 0:01:30.000000, 0:01:30.644000, hasNext: false
+      if (progressState.total.inSeconds > 0) {
+        if (progressState.current >= progressState.total) {
+          if (!_handler.player.hasNext) {
+            ref.read(audioControllerProvider).getNextSongAndSet();
+          }
+        }
+      }
     });
   }
 
@@ -58,7 +66,9 @@ class AudioListener {
   void _listenProcessingState() {
     _handler.player.processingStateStream.listen((state) {
       if (state == ProcessingState.completed) {
-        ref.read(audioControllerProvider).getNextSongAndSet();
+        // NOTE: playing=trueじゃないと検知できない
+        // _listenProgressStateの方で再生中問わず末尾検出できたので、そっちだけで済んだ
+        // ref.read(audioControllerProvider).getNextSongAndSet();
       }
     });
   }

@@ -58,7 +58,6 @@ class AudioController {
       Logger().d('add next item to queue, $nextItem');
       await _handler.addQueueItem(it);
       await _handler.skipToNext();
-      _handler.play();
     });
   }
 }
