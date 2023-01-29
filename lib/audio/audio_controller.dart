@@ -27,25 +27,12 @@ class AudioController {
     _handler.seek(position);
   }
 
-  /// just_audioのseekToPreviousは前のアイテムがある時しか行われないので、自前で処理を定義している
-  /// 前のアイテムがない時は自前でseekして先頭に戻す
   Future<void> skipToPrevious() async {
-    if (_handler.player.hasPrevious) {
-      _handler.skipToPrevious();
-    } else {
-      seek(Duration.zero);
-    }
+    _handler.skipToPrevious();
   }
 
-  /// skipToPreviousと同じく自前で処理し、次アイテムがない時は末尾までseekする
   Future<void> skipToNext() async {
-    if (_handler.player.hasNext) {
-      _handler.skipToNext();
-    } else {
-      // nullだとjust_audioの仕様でpositionがゼロになってしまうので、nullじゃなければ実行
-      final duration = _handler.mediaItem.value?.duration;
-      if (duration != null) seek(duration);
-    }
+    _handler.skipToNext();
   }
 
   Future<void> setInitialItems() async {

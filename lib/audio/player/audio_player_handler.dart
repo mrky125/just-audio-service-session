@@ -149,14 +149,31 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> seek(final Duration? position, {int? index}) async {
-    _player.seek(position, index: index);
+    await _player.seek(position, index: index);
   }
 
+  /// just_audioのseekToPreviousは前のアイテムがある時しか行われないので、自前で処理を定義している
+  /// 前のアイテムがあり、開始3秒間の場合は前のアイテムに戻る
+  /// それ以外前の場合は自前でseekして先頭に戻す
   @override
-  Future<void> skipToPrevious() => _player.seekToPrevious();
+  Future<void> skipToPrevious() async {
+    if (_player.hasPrevious && player.position.inSeconds < 3) {
+        _player.seekToPrevious();
+    } else {
+      seek(Duration.zero);
+    }
+  }
 
+  /// skipToPreviousと同じく自前で処理し、次アイテムがない時は末尾までseekする
   @override
-  Future<void> skipToNext() => _player.seekToNext();
+  Future<void> skipToNext() async {
+    final duration = mediaItem.value?.duration;
+    if (_player.hasNext) {
+      await _player.seekToNext();
+    } else if (duration != null) {
+      await seek(duration);
+    }
+  }
 }
 
 extension ItemToSource on MediaItem {
