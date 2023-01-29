@@ -40,6 +40,15 @@ class AudioController {
     _handler.setInitialItems();
   }
 
+  Future<void> stop() async {
+    await _handler.stop();
+  }
+
+  Future<void> stopAndRemoveAll() async {
+    await _handler.stop();
+    _handler.removeAll();
+  }
+
   void getNextSongAndSet() async {
     final index = _handler.player.currentIndex;
     final nextItem = await ref

@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -38,6 +39,7 @@ class MyHomePage extends ConsumerWidget {
     ref
         .read(audioListenerProvider)
         .startListen(); // initialize and listen stream
+    final state = ref.watch(playbackStateProvider).processingState;
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -87,10 +89,15 @@ class MyHomePage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          ref.read(audioControllerProvider).setInitialItems();
+          if (state == AudioProcessingState.idle) {
+            ref.read(audioControllerProvider).setInitialItems();
+          } else {
+            ref.read(audioControllerProvider).stopAndRemoveAll();
+          }
         },
-        tooltip: 'Set initial items',
-        child: const Icon(Icons.add),
+        child: state == AudioProcessingState.idle
+            ? const Icon(Icons.add)
+            : const Icon(Icons.delete),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }

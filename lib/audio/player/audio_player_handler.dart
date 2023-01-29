@@ -142,6 +142,12 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
+  Future<void> removeQueueItem(MediaItem mediaItem) async {
+    final index = queue.value.indexOf(mediaItem);
+    await _playlist.removeAt(index);
+  }
+
+  @override
   Future<void> play() => _player.play();
 
   @override
@@ -173,6 +179,20 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     } else if (duration != null) {
       await seek(duration);
     }
+  }
+
+  @override
+  Future<void> stop() async {
+    // この後にmediaItemなど各種BehaviorSubjectをリセットするなら、正しく処理させるためにawait必要
+    await _player.stop();
+  }
+
+  Future<void> removeAll() async {
+    // 今の実装だと最初にupdateQueueを呼ぶからそこでclearされるけど、そうじゃなくなった時のために
+    _playlist.clear();
+    // 現在表示中のアイテムを消すため（iOSはOKだけどAndroidは通知センターに残ってしまい、そこから不正な状態で再生できてしまう）
+    mediaItem.add(null);
+    // TODO: reset other subjects.
   }
 }
 
