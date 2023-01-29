@@ -49,6 +49,10 @@ class AudioController {
     _handler.removeAll();
   }
 
+  Future<void> dispose() async {
+    _handler.player.dispose();
+  }
+
   void getNextSongAndSet() async {
     final index = _handler.player.currentIndex;
     final nextItem = await ref

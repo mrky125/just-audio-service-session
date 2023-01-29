@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import 'app_lifecycle_observer.dart';
 import 'audio/audio_controller.dart';
 import 'audio/audio_listener.dart';
 import 'audio/audio_state_notifier.dart';
@@ -36,6 +37,7 @@ class MyHomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    _listenAppLifecycleState(ref);
     ref
         .read(audioListenerProvider)
         .startListen(); // initialize and listen stream
@@ -100,5 +102,19 @@ class MyHomePage extends ConsumerWidget {
             : const Icon(Icons.delete),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  /// [appLifecycleProvider]を通してアプリのライフサイクルを監視
+  void _listenAppLifecycleState(WidgetRef ref) {
+    ref.listen(appLifecycleProvider, (previous, next) async {
+      switch (next) {
+        case AppLifecycleState.detached:
+          // アプリ終了したら、音声再生を停止し再生状態の監視を止める
+          ref.read(audioControllerProvider).dispose();
+          break;
+        default:
+          break;
+      }
+    });
   }
 }
