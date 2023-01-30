@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "386986314949",
+    "project_id": "xalum1u",
+    "storage_bucket": "xalum1u.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:386986314949:android:b8505f3dd1dce1912cb4ac",
+        "android_client_info": {
+          "package_name": "com.xalum1u.just_audio_service_session"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "386986314949-ht4c0vgud5lc5nomrf0k4unkh78h2v1n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOD_9nWqlY5psr-wBRE3uIe0MS_Hbf-EU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "386986314949-ht4c0vgud5lc5nomrf0k4unkh78h2v1n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "386986314949-cba1pato7186lk5lqvva733liu1t6dof.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.xalum1u.justAudioServiceSession"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
