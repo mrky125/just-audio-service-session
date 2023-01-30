@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
+            VALUE "CompanyName", "com.xalum1u" "\0"
             VALUE "FileDescription", "just_audio_service_session" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "just_audio_service_session" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 com.xalum1u. All rights reserved." "\0"
             VALUE "OriginalFilename", "just_audio_service_session.exe" "\0"
             VALUE "ProductName", "just_audio_service_session" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
